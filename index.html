@@ -1321,8 +1321,17 @@ async function generateMasterpiece() {
     document.getElementById('mp-tool-badge').textContent=mp.tool||'Higgsfield AI';
     document.getElementById('mp-caption').textContent=mp.caption||'';
     document.getElementById('mp-arte-desc').textContent=mp.arte_desc||'';
-    document.getElementById('mp-arte-tool').textContent='→ Generar en '+(mp.tool||'Higgsfield AI').toUpperCase();
+    document.getElementById('mp-arte-tool').textContent='→ Herramienta recomendada: '+(mp.tool||'Higgsfield AI');
     const at=document.getElementById('mp-arte-txt');at.textContent=mp.prompt||'';at.style.display='block';
+    // Save prompt and show generation buttons
+    _currentPrompt = mp.prompt || '';
+    const arteActions = document.getElementById('arte-actions');
+    if (arteActions) arteActions.style.display = 'flex';
+    // Set Higgsfield link
+    const higgsfieldBtn = document.getElementById('btn-higgsfield');
+    if (higgsfieldBtn) higgsfieldBtn.href = 'https://app.higgsfield.ai';
+    // Update credits UI
+    updateCreditsUI();
     const hh=document.getElementById('mp-hashtags');hh.innerHTML='';
     (mp.hashtags||[]).forEach(h=>{const t=document.createElement('span');t.className='tag';t.textContent=h;hh.appendChild(t);});
     mpC.style.display='block';showToast('Masterpiece generado ✓');
@@ -1330,7 +1339,17 @@ async function generateMasterpiece() {
   mpL.style.display='none';btn.disabled=false;
 }
 
-function resetMP() { document.getElementById('mp-content').style.display='none'; document.getElementById('mp-prereq').style.display='block'; document.querySelectorAll('.idea-card,.fmt-card').forEach(c=>c.classList.remove('selected')); cSelIdea=null;cSelFormat=null; const btn=document.getElementById('btn-mp');btn.style.opacity='0.4';btn.style.pointerEvents='none'; }
+function resetMP() {
+  document.getElementById('mp-content').style.display='none';
+  document.getElementById('mp-prereq').style.display='block';
+  document.querySelectorAll('.idea-card,.fmt-card').forEach(c=>c.classList.remove('selected'));
+  cSelIdea=null;cSelFormat=null;_currentPrompt='';
+  const btn=document.getElementById('btn-mp');btn.style.opacity='0.4';btn.style.pointerEvents='none';
+  const arteActions=document.getElementById('arte-actions');
+  if(arteActions) arteActions.style.display='none';
+  const dalleResult=document.getElementById('dalle-result');
+  if(dalleResult) dalleResult.style.display='none';
+}
 function copyEl(id,btn) { const el=document.getElementById(id); navigator.clipboard.writeText(el.textContent||el.innerText).then(()=>{const o=btn.textContent;btn.textContent='✓';btn.style.color='var(--lime)';showToast('Copiado ✓');setTimeout(()=>{btn.textContent=o;btn.style.color='';},1800);}); }
 
 /* ═══════════════════════════════════════════
@@ -2011,6 +2030,15 @@ function adminViewUser(key) {
    TOAST & UTILS
 ═══════════════════════════════════════════ */
 function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+function toggleInstrucciones() {
+  const panel = document.getElementById('instrucciones-panel');
+  const txt = document.getElementById('inst-btn-txt');
+  const icon = document.getElementById('inst-btn-icon');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  txt.textContent = isOpen ? 'VER INSTRUCCIONES DE EXPORTACIÓN' : 'CERRAR INSTRUCCIONES';
+  icon.textContent = isOpen ? '📋' : '✕';
+}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
 
 /* ═══════════════════════════════════════════
