@@ -710,7 +710,25 @@ td.red{color:var(--red)}
         <div class="mp-grid">
           <div class="mp-card"><div class="mp-card-head"><span class="mp-card-title">🎬 Guión</span><button class="copy-btn" onclick="copyEl('mp-guion',this)">⧉</button></div><div class="mp-card-body"><div class="mp-content" id="mp-guion"></div></div></div>
           <div class="mp-card"><div class="mp-card-head"><span class="mp-card-title">🤖 Prompt IA</span><button class="copy-btn" onclick="copyEl('mp-prompt',this)">⧉</button></div><div class="mp-card-body"><div class="mp-content" id="mp-prompt"></div><div style="margin-top:10px;display:flex;align-items:center;gap:8px"><span id="mp-tool-badge" class="badge-lime"></span><span style="font-size:10px;color:var(--muted)">Herramienta recomendada</span></div></div></div>
-          <div class="mp-card"><div class="mp-card-head"><span class="mp-card-title">🎨 Arte</span><button class="copy-btn" onclick="copyEl('mp-arte-txt',this)">⧉</button></div><div class="mp-card-body"><div class="arte-box"><div style="font-size:28px">🖼️</div><div class="arte-desc-txt" id="mp-arte-desc"></div><div class="arte-tool-txt" id="mp-arte-tool"></div></div><div id="mp-arte-txt" style="font-size:11px;color:var(--muted2);line-height:1.5;margin-top:10px;display:none"></div></div></div>
+          <div class="mp-card"><div class="mp-card-head"><span class="mp-card-title">🎨 Arte</span><button class="copy-btn" onclick="copyEl('mp-arte-txt',this)">⧉</button></div><div class="mp-card-body">
+            <div class="arte-box">
+              <div style="font-size:28px">🖼️</div>
+              <div class="arte-desc-txt" id="mp-arte-desc"></div>
+              <div class="arte-tool-txt" id="mp-arte-tool"></div>
+            </div>
+            <div id="mp-arte-txt" style="font-size:11px;color:var(--muted2);line-height:1.5;margin-top:10px;display:none"></div>
+            <!-- BOTONES DE GENERACIÓN -->
+            <div id="arte-actions" style="display:none;flex-direction:column;gap:8px;margin-top:12px">
+              <button onclick="generateArteCanva()" style="width:100%;padding:11px 16px;background:var(--lime-dim);border:1px solid var(--lime);color:var(--lime);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:4px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px" onmouseover="this.style.background='rgba(200,255,0,.2)'" onmouseout="this.style.background='var(--lime-dim)'">→ Generar en CANVA</button>
+              <button onclick="generateArteHiggsfield()" style="width:100%;padding:11px 16px;background:var(--dark4);border:1px solid var(--border2);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:4px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px" onmouseover="this.style.borderColor='var(--lime)';this.style.color='var(--lime)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">→ Generar en Higgsfield AI</button>
+              <button onclick="generateArteIA()" id="btn-gen-ia" style="width:100%;padding:11px 16px;background:var(--dark4);border:1px solid var(--border2);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:4px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px" onmouseover="this.style.borderColor='var(--lime)';this.style.color='var(--lime)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">⚡ Vista Previa IA (texto)</button>
+            </div>
+            <!-- RESULTADO GENERACIÓN IA -->
+            <div id="dalle-result" style="display:none;margin-top:12px;background:var(--dark3);border:1px solid var(--border);border-radius:6px;padding:14px">
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--lime);margin-bottom:8px">DESCRIPCIÓN VISUAL IA</div>
+              <div id="dalle-result-txt" style="font-size:12px;color:#ccc;line-height:1.6"></div>
+            </div>
+          </div></div>
           <div class="mp-card"><div class="mp-card-head"><span class="mp-card-title">✍️ Caption</span><button class="copy-btn" onclick="copyEl('mp-caption',this)">⧉</button></div><div class="mp-card-body"><div class="mp-content" id="mp-caption"></div></div></div>
         </div>
         <div style="margin-top:10px;background:var(--dark3);border:1px solid var(--border);padding:14px 16px;border-radius:4px"><div class="badge-lime" style="margin-bottom:8px">Hashtags recomendados</div><div class="tag-row" id="mp-hashtags"></div></div>
@@ -1327,16 +1345,59 @@ async function generateMasterpiece() {
     _currentPrompt = mp.prompt || '';
     const arteActions = document.getElementById('arte-actions');
     if (arteActions) arteActions.style.display = 'flex';
-    // Set Higgsfield link
-    const higgsfieldBtn = document.getElementById('btn-higgsfield');
-    if (higgsfieldBtn) higgsfieldBtn.href = 'https://app.higgsfield.ai';
-    // Update credits UI
-    updateCreditsUI();
     const hh=document.getElementById('mp-hashtags');hh.innerHTML='';
     (mp.hashtags||[]).forEach(h=>{const t=document.createElement('span');t.className='tag';t.textContent=h;hh.appendChild(t);});
     mpC.style.display='block';showToast('Masterpiece generado ✓');
   } catch(e) { document.getElementById('mp-guion').textContent='Error al generar. Intenta de nuevo.'; mpC.style.display='block'; }
   mpL.style.display='none';btn.disabled=false;
+}
+
+/* ═══════════════════════════════════════════
+   ARTE GENERATION FUNCTIONS
+═══════════════════════════════════════════ */
+let _currentPrompt = '';
+
+function generateArteCanva() {
+  if (!_currentPrompt) { showToast('⚠ Genera un Masterpiece primero'); return; }
+  navigator.clipboard.writeText(_currentPrompt).then(() => {
+    showToast('✓ Prompt copiado — pégalo en Canva Magic Media');
+  }).catch(()=>{});
+  window.open('https://www.canva.com/create/', '_blank');
+}
+
+function generateArteHiggsfield() {
+  if (!_currentPrompt) { showToast('⚠ Genera un Masterpiece primero'); return; }
+  navigator.clipboard.writeText(_currentPrompt).then(() => {
+    showToast('✓ Prompt copiado — pégalo en Higgsfield');
+  }).catch(()=>{});
+  window.open('https://app.higgsfield.ai', '_blank');
+}
+
+async function generateArteIA() {
+  if (!_currentPrompt) { showToast('⚠ Genera un Masterpiece primero'); return; }
+  const btn = document.getElementById('btn-gen-ia');
+  const resultBox = document.getElementById('dalle-result');
+  const resultTxt = document.getElementById('dalle-result-txt');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando...';
+  resultBox.style.display = 'none';
+  try {
+    const ctx = brandCtx();
+    const prompt = `Eres un director de arte creativo. Con base en este prompt de imagen:\n"${_currentPrompt}"\n\nY este contexto de marca:\n${ctx||'Sin contexto de marca'}\n\nCrea una descripción visual detallada de cómo se vería esta imagen generada. Incluye: composición, paleta de colores, iluminación, elementos visuales, mood. Máximo 120 palabras, en español.`;
+    const r = await fetch('https://hub-jany-api.konverze-bi.workers.dev', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({model: 'claude-haiku-4-5-20251001', max_tokens: 300, messages: [{role:'user', content: prompt}]})
+    });
+    const d = await r.json();
+    const txt = d.content?.map(i=>i.text||'').join('') || '';
+    if (txt) {
+      resultTxt.textContent = txt;
+      resultBox.style.display = 'block';
+      showToast('✓ Descripción visual generada');
+    } else { showToast('⚠ Sin respuesta del servidor'); }
+  } catch(e) { showToast('⚠ Error al generar. Intenta de nuevo.'); }
+  btn.disabled = false;
+  btn.textContent = '⚡ Vista Previa IA (texto)';
 }
 
 function resetMP() {
